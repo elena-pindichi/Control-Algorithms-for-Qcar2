@@ -1,28 +1,36 @@
-# Connection with the car
-## Model configuration settings:
-1. Once you open Simulink, open the Model Configuration Settings.
-2. Under Solver->Solver selection, set the Type Fixed Step and set the solver to the desired one. 
-3. Under Solver->Solver details set the Fixed-step size to the desired value.
-4. Under Code Generation->Target selection set System target file as applicable to your deployed application:
-    - For applications running on the development machine, use quarc_win64.tlc for a windows-based platform. This may be used for real-time simulations and robust communications.
-    - For applications to be deployed to a QCar target, select the quarc_linux_nvidia.tlc for the QCar platform.
-5. If the target is the QCar, you must also specify the location of the platform on the network so that the application can be downloaded there automatically by Quarc. Navigate to Code Generation->Interface and edit the MEX file arguments by adding the following code:
-    ```'-w -d /tmp -uri  %u','tcpip://IP_ADDRESS:PORT'```
-Do not exclude the comma or the single quotations. Here IP_ADDRESS refers to the IPv4 address of the QCar shown on the car's LCD and screen PORT refers to the number between 17001 and 17999. Simulink will use the PORT to communicate with the deployed application and display any data connected to Simulink sinks in your code on your local machine itself.
+# QCar Simulink Deployment Guide
 
-For the project I have worked on, it worked:
-    ```'-w -d /tmp -uri %u', 'tcpip://192.168.1.126:17001'```
+This guide provides instructions for configuring Simulink, generating code, and deploying it to a QCar or development machine.
 
-## Code generation, deployment and monitoring:
-1. Build and download your code. Press Ctrl+B, open Diagnostic viewer.
-2. Connect to the target Ctr+Shift+O.
-3. Start your model: Ctrl+Shift+Q.
-4. Stop your model: Ctrl+Shift+W.
+---
 
-## Blocks in Simulink
-More details regarding the blocks to add in Simulink can be found here:
-https://www.quanser.com/resource/quarc-essentials-hardware-interfacing/
+## 🔧 Model Configuration Settings
 
+Follow these steps after opening your Simulink model:
 
+### 1. Solver Settings
+- Go to **Model Configuration Settings** → **Solver**.
+- Under **Solver selection**:
+  - Set **Type** to: `Fixed-step`
+  - Choose an appropriate **Solver** (e.g., `ode3`, `ode5`, etc.).
+- Under **Solver details**:
+  - Set **Fixed-step size** to the desired time step (e.g., `0.001`).
 
-Additional Information: https://github.com/quanser/ACC-Competition-2025.git
+### 2. Code Generation: Target Selection
+- Go to **Code Generation** → **Target selection**.
+- Set **System target file** depending on your target:
+  - **Development machine**: `quarc_win64.tlc` (Windows platform – good for real-time simulation and testing).
+  - **QCar target**: `quarc_linux_nvidia.tlc`.
+
+### 3. Code Generation: Network Configuration for QCar
+If deploying to **QCar**, specify the target IP and port:
+
+- Go to **Code Generation** → **Interface**.
+- Under **MEX file arguments**, add:
+
+  ```matlab
+  '-w -d /tmp -uri %u', 'tcpip://IP_ADDRESS:PORT'
+
+- For the car, I used:
+  ```matlab
+  '-w -d /tmp -uri %u', 'tcpip://192.168.1.126:17001'
