@@ -1,22 +1,75 @@
-# Control Implementation of Safe and Secure Self-Driving Car - Quanser
-## Model Predictive Control implementations:
-### Nonlinear MPC:
-- In the script 'NL_MPC_qcar.m' is the implementation of Nonlinear MPC with reference tracking.
-- The reference created are either a line, a square, a circle or a B-Spline precomputed.
-- It returns also the RMSE and the computation time for solving the optimization problem.
+# 🤖 Control Implementation of a Safe and Secure Self-Driving Car – Quanser
 
-### Feedback Linearized MPC:
-- In the script 'FL_MPC_qcar.m' is the implementation of Feedback Linearized MPC with reference tracking.
-- In the folder 'tools' you can extract the functions that define the flat output, the mapping matrix for the control input and the matrix for the nonlinear constraints.
-- It returns also the RMSE and the computation time for solving the optimization problem.
+This repository features several Model Predictive Control (MPC) strategies for autonomous trajectory tracking and real-time control of the QCar robot platform.
 
-### Simulink for the real robot:
-- In the folder 'quarc-simulink' there is the integration of the control algorithms with reference tracking set on the actual robot.
-- The solver used for this integration was: 'fmincon'.
-- It is still undergoing work to integrate Casadi through Quarc.
+---
 
-### ROS package folder:
-- It has the functions added to a custom package in ROS to run the MPC algorithms on the real robot.
+## 📊 Model Predictive Control (MPC) Implementations
 
-### Casadi in Simulink folder:
-- It has the same implementation of the algorithms integrated with Casadi.
+### 🔁 Nonlinear MPC (NMPC)
+
+- Implemented in: `NL_MPC_qcar.m`
+- Supports multiple trajectory types:
+  - Line
+  - Square
+  - Circle
+  - Precomputed B-Spline
+- Outputs:
+  - Root Mean Square Error (RMSE)
+  - Computation time for solving the optimization
+
+---
+
+### ➕ Feedback Linearized MPC (FLMPC)
+
+- Implemented in: `FL_MPC_qcar.m`
+- Additional helper functions are located in the `tools/` directory:
+  - Flat output definition
+  - Control input mapping matrix
+  - Nonlinear constraints matrix
+- Outputs:
+  - RMSE
+  - Computation time
+
+---
+
+### 🧩 Simulink Integration for Real-Time QCar Control
+
+- Located in the `quarc-simulink/` folder
+- Contains integration of the NMPC and FLMPC controllers for the real QCar platform
+- Optimization is solved using MATLAB’s `fmincon`
+- 🚧 **Note**: Work is in progress to integrate CasADi through QUARC
+
+---
+
+### 🐢 ROS Package Folder
+
+- Contains ROS-compatible scripts for deploying the MPC controllers on the QCar robot
+- Designed as a custom ROS 2 package
+- Ensures real-time compatibility with ROS 2 nodes and topics
+
+---
+
+### 🧮 CasADi in Simulink Folder
+
+- Includes CasADi-based implementations of both NMPC and FLMPC
+- Provides symbolic optimization and code generation for embedded execution within Simulink
+
+---
+
+## 📁 Folder Summary
+
+| Folder                | Description                                              |
+|-----------------------|----------------------------------------------------------|
+| `quarc-simulink/`     | Simulink + real robot integration using `fmincon`        |
+| `tools/`              | Helper functions for flat outputs and constraints        |
+| `casadi-in-simulink/` | CasADi-enhanced MPC implementation inside Simulink       |
+| `ros2-package/`       | ROS 2 node integration for MPC-based control             |
+
+---
+
+## 🚀 Ready to Explore
+
+Use these modules to simulate, validate, and deploy your autonomous driving strategies using Quanser's QCar platform.
+
+> Contributions and experiments welcome! Happy testing 🧪🚘
