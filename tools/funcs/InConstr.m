@@ -1,0 +1,9 @@
+function L = InConstr(eta,l,Delta)
+    s1 = sin(eta(1)+eta(2));   c1 = cos(eta(1)+eta(2)); 
+    s2 = sin(eta(1)+2*eta(2)); c2 = cos(eta(1)+2*eta(2)); 
+    L = [-1/2*(cos(eta(1))+c2),                                     -1/2*(sin(eta(1))+s1); ...
+         1/(2*l*Delta)*(Delta*s1 - Delta*sin(eta(1)) + 2*l*s2),     1/(2*l*Delta)*(-Delta*c2 + Delta*cos(eta(1)) - 2*l*c1); ...
+         1/2*(cos(eta(1))+c2),                                      1/2*(sin(eta(1))+s1); ...
+         -1/(2*l*Delta)*(Delta*s1 - Delta*sin(eta(1)) + 2*l*s2),    -1/(2*l*Delta)*(-Delta*c2 + Delta*cos(eta(1)) - 2*l*c1)];
+end
+

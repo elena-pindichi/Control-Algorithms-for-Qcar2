@@ -1,0 +1,90 @@
+# How to run files:
+### Example for Nonlinear MPC:
+- run the script 'casadi_simulink_nmpc.m' and then the script 'load_trajectory.m'
+- open 'nlmpc_simulink.slx' and run
+(for FLMPC is the same)
+
+# Code explanation
+In each code 'casadi_simulink_..mpc.m' a mex file is created that is uploaded on the S-function in Simulink. The .c script creates a bridge between Casadi and Simulink.
+
+Explanation line by line:
+- In the first part, the weight matrices and the parameters for the problem are defined
+- The symbolic vectors for the states and control inputs are defined like:
+        "x = SX.sym('x');    
+        y = SX.sym('y');    
+        theta = SX.sym('theta'); 
+        phi = SX.sym('phi');
+        states = [x; y; theta; phi];
+        n_states = length(states);"
+- The nonlinear dynamics are defined in function 'f'
+- The reference point is computed
+- Standard initialization for direct transcription of an optimal control problem:
+        "w = {};     % Optimization variables
+        w0 = [];    % Initial guesses
+        lbw = [];   % Lower bounds
+        ubw = [];   % Upper bounds
+        g = {};     % Constraints
+        lbg = [];
+        ubg = [];
+        J = 0;      % Objective function"
+- First state is fixed (initial condition):
+        "Xk = MX.sym('X0', n_states);
+        w = {w{:}, Xk};
+        w0 = [w0; zeros(n_states,1)];
+        lbw = [lbw; zeros(n_states,1)];
+        ubw = [ubw; zeros(n_states,1)];
+        Zk = LinOutput(Xk, Delta, l);"
+- In the prediction horizon loop, each iteration adds a control input and state transition, it adds tracking and control effort cost for the objecive and it adds the dynamic constraints:
+        "% Control variable
+            Uk = MX.sym(['U_' num2str(k)], n_controls);
+            w = {w{:}, Uk};
+            w0 = [w0; 0; 0];
+            lbw = [lbw; -1; -1];
+            ubw = [ubw;  1;  1];
+
+            % Integrate dynamics
+            Fk = F('x0', Xk, 'u', Uk);
+            Xk_end = Fk.xf;
+
+            % Cost function: tracking + control effort
+            J = J + (Xk - x_ref)' * Q * (Xk - x_ref) + Uk' * R * Uk;
+
+            % New state variable
+            Xk = MX.sym(['X_' num2str(k+1)], n_states);
+            w = {w{:}, Xk};
+            w0 = [w0; zeros(n_states,1)];
+            lbw = [lbw; -inf; -inf; -inf; -pi/2];
+            ubw = [ubw;  inf; inf; inf; pi/2];
+
+            % Add dynamics constraint
+            g = {g{:}, Xk_end - Xk};
+            lbg = [lbg; zeros(n_states,1)];
+            ubg = [ubg; zeros(n_states,1)];"
+- Define and configure the NLP problem:
+        "prob = struct('f', J, 'x', vertcat(w{:}), 'g', vertcat(g{:}));
+        opts = struct('ipopt', struct('print_level', 0), 'print_time', false);
+        solver = nlpsol('solver', 'ipopt', prob, opts);"
+- It creates the Symbolic MPC function and solves the NLP symbolically in terms of s0, where the first {} are the inputs of the function and the second {} are the outputs of the function:
+        "% Export initial state symbol
+        s0 = MX.sym('s0', n_states);
+        lbw_sym = MX(lbw);
+        ubw_sym = MX(ubw);
+        lbw_sym(1:n_states) = s0;
+        ubw_sym(1:n_states) = s0;
+
+        % Solve the problem symbolically
+        sol_sym = solver('x0', w0, ...
+                        'lbx', lbw_sym, ...
+                        'ubx', ubw_sym, ...
+                        'lbg', lbg, ...
+                        'ubg', ubg);
+
+        % Map from initial state to first control input
+        mpc_fun = Function('mpc_fun', {s0}, {sol_sym.x(n_states+1:n_states+2)});"
+- Saves and compiles the function for fast real-time execution in C/C++:
+        "mpc_fun.save('mpc_fun.casadi');
+        ...
+        mex(...);
+        "
+There have been some updates on the code, but the skeleton of the code is explained above and for more details you can access the page from below.
+The .c script is taken from: https://web.casadi.org/blog/mpc-simulink2/, and it is prewritten by Casadi. It is used for initialization of the ports for both input and output and is linking the .m script code with Simulink.
