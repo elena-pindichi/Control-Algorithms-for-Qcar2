@@ -1,1 +1,1 @@
-# Qcar-2---Control-Algorithms
+# Control Algorithms for Qcar 2
